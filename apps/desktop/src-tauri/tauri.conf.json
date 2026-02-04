@@ -33,7 +33,12 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ],
-    "externalBin": ["bin/ionicx-api"],
+    "externalBin": [
+      {
+        "name": "ionicx-api",
+        "path": "bin/ionicx-api"
+      }
+    ],
     "windows": {
       "webviewInstallMode": {
         "type": "offlineInstaller"

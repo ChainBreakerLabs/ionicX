@@ -40,6 +40,18 @@ $env:CGO_ENABLED = "0"
 go build -o (Join-Path $outDir $outputNameWithTarget) ./cmd
 Pop-Location
 
-Copy-Item (Join-Path $outDir $outputNameWithTarget) (Join-Path $outDir $outputName) -Force
+$binaryPath = Join-Path $outDir $outputNameWithTarget
+if (-not (Test-Path $binaryPath)) {
+    Write-Error "Build failed, binary not created at $binaryPath"
+    exit 1
+}
 
-Write-Host "Backend built at $outDir\\$outputNameWithTarget"
+# Copy to generic name for Tauri to find it
+$genericPath = Join-Path $outDir $outputName
+if (-not (Copy-Item $binaryPath $genericPath -Force -PassThru)) {
+    Write-Error "Failed to copy binary to $genericPath"
+    exit 1
+}
+
+Write-Host "✓ Backend built at $binaryPath"
+Write-Host "✓ Binary available as $genericPath"

@@ -50,6 +50,16 @@ echo "Building backend (${GOOS_VALUE}/${GOARCH_VALUE})..."
   CGO_ENABLED=0 GOOS="${GOOS_VALUE}" GOARCH="${GOARCH_VALUE}" go build -o "${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}" ./cmd
 )
 
-cp "${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}" "${OUT_DIR}/${OUTPUT_NAME}"
+if [[ ! -f "${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}" ]]; then
+  echo "ERROR: Build failed, binary not created at ${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}"
+  exit 1
+fi
 
-echo "Backend built at ${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}"
+# Copy to generic name for Tauri to find it
+if ! cp "${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}" "${OUT_DIR}/${OUTPUT_NAME}"; then
+  echo "ERROR: Failed to copy binary to ${OUT_DIR}/${OUTPUT_NAME}"
+  exit 1
+fi
+
+echo "✓ Backend built at ${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}"
+echo "✓ Binary available as ${OUT_DIR}/${OUTPUT_NAME}"

@@ -123,8 +123,14 @@ jobs:
       - name: Verify backend binary (mac/linux)
         if: runner.os != 'Windows'
         run: |
-          test -f apps/desktop/src-tauri/bin/ionicx-api
-          echo "Backend binary verified"
+          BIN_DIR="apps/desktop/src-tauri/bin"
+          if [[ ! -f "$BIN_DIR/ionicx-api" ]] && [[ ! -f "$BIN_DIR/ionicx-api"* ]]; then
+            echo "ERROR: Backend binary not found in $BIN_DIR"
+            ls -la "$BIN_DIR" || echo "Directory does not exist"
+            exit 1
+          fi
+          echo "✓ Backend binary verified"
+          ls -la "$BIN_DIR/ionicx-api"*
 
       - name: Verify backend binary (windows)
         if: runner.os == 'Windows'
@@ -289,7 +295,7 @@ jobs:
           $count = (Get-ChildItem -Path $outDir -File -Filter "ionicx-*" -ErrorAction SilentlyContinue | Measure-Object).Count
           if ($count -eq 0) {
             Write-Error "No release assets found"
-            Write-Host "Contents of $bundleDir:"
+            Write-Host "Contents of bundle directory:"
             Get-ChildItem -Path $bundleDir -Recurse | Select-Object FullName
             exit 1
           }
