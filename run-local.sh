@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-FRONTEND_DIR="${ROOT_DIR}/ionic-x"
-BACKEND_DIR="${ROOT_DIR}/ionic-x-ms"
+FRONTEND_DIR="${ROOT_DIR}/apps/web"
+BACKEND_DIR="${ROOT_DIR}/services/api"
 TOOLS_DIR="${ROOT_DIR}/.tools"
 PORT_CLEANUP="${PORT_CLEANUP:-3000}"
 

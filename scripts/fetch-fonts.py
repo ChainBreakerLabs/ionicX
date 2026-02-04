@@ -9,9 +9,9 @@ from urllib.parse import quote_plus
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 FONTS_JSON = os.path.join(ROOT_DIR, "scripts", "fonts.json")
-FONTS_OUT_DIR = os.path.join(ROOT_DIR, "ionic-x", "public", "fonts")
-FONTS_CSS_PATH = os.path.join(ROOT_DIR, "ionic-x", "src", "fonts.css")
-FONT_OPTIONS_TS = os.path.join(ROOT_DIR, "ionic-x", "src", "constants", "fontOptions.ts")
+FONTS_OUT_DIR = os.path.join(ROOT_DIR, "apps", "web", "public", "fonts")
+FONTS_CSS_PATH = os.path.join(ROOT_DIR, "apps", "web", "src", "fonts.css")
+FONT_OPTIONS_TS = os.path.join(ROOT_DIR, "apps", "web", "src", "constants", "fontOptions.ts")
 
 
 USER_AGENT = (

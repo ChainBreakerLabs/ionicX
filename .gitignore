@@ -13,10 +13,10 @@ pnpm-debug.log*
 npm-debug.log*
 
 # Build artifacts
-ionic-x/dist/
-ionic-x/.vite/
-ionic-x-ms/dist/
-desktop/src-tauri/target/
+apps/web/dist/
+apps/web/.vite/
+services/api/dist/
+apps/desktop/src-tauri/target/
 release/
 .tools/
 

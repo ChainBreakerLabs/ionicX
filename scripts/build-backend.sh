@@ -2,8 +2,8 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BACKEND_DIR="${ROOT_DIR}/ionic-x-ms"
-OUT_DIR="${ROOT_DIR}/desktop/src-tauri/bin"
+BACKEND_DIR="${ROOT_DIR}/services/api"
+OUT_DIR="${ROOT_DIR}/apps/desktop/src-tauri/bin"
 
 mkdir -p "${OUT_DIR}"
 

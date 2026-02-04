@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 
 $rootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
-$backendDir = Join-Path $rootDir "ionic-x-ms"
-$outDir = Join-Path $rootDir "desktop/src-tauri/bin"
+$backendDir = Join-Path $rootDir "services/api"
+$outDir = Join-Path $rootDir "apps/desktop/src-tauri/bin"
 
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 

@@ -13,9 +13,9 @@ Este documento describe cómo ejecutar y empaquetar `ionicX` como aplicación de
   - `patchelf`
 
 **Estructura**
-- `ionic-x/`: frontend React (Vite).
-- `ionic-x-ms/`: backend Go (API + SQLite).
-- `desktop/`: wrapper Tauri.
+- `apps/web/`: frontend React (Vite).
+- `services/api/`: backend Go (API + SQLite).
+- `apps/desktop/`: wrapper Tauri.
 
 **Rutas de datos por OS (default)**
 - macOS: `~/Library/Application Support/ionicX/`
@@ -30,17 +30,17 @@ Este documento describe cómo ejecutar y empaquetar `ionicX` como aplicación de
 ## Desarrollo
 
 **Web (frontend + backend manual)**
-1. `cd ionic-x-ms`
+1. `cd services/api`
 2. `go run ./cmd`
-3. `cd ../ionic-x`
+3. `cd ../../apps/web`
 4. `npm run dev`
 
 **Desktop (Tauri + sidecar)**
-1. `cd ionic-x`
+1. `cd apps/web`
 2. `npm run dev`
 3. En otra terminal: `npm run tauri dev`
 
-> `npm run tauri dev` delega a `desktop/` y levanta el sidecar Go con puerto dinámico.
+> `npm run tauri dev` delega a `apps/desktop/` y levanta el sidecar Go con puerto dinámico.
 
 ## Build
 
@@ -58,11 +58,11 @@ scripts/build-desktop.sh
 ```bash
 python3 scripts/fetch-fonts.py
 ```
-Esto descarga las fuentes a `ionic-x/public/fonts/` y genera `ionic-x/src/fonts.css` y `ionic-x/src/constants/fontOptions.ts`.
+Esto descarga las fuentes a `apps/web/public/fonts/` y genera `apps/web/src/fonts.css` y `apps/web/src/constants/fontOptions.ts`.
 
 Los instaladores se generan en:
 ```
-desktop/src-tauri/target/release/bundle/
+apps/desktop/src-tauri/target/release/bundle/
 ```
 
 ## Troubleshooting

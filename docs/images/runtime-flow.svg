@@ -1,0 +1,34 @@
+<svg width="1200" height="520" viewBox="0 0 1200 520" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="ionicX runtime flow">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1220" />
+      <stop offset="100%" stop-color="#111827" />
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 Z" fill="#38bdf8" />
+    </marker>
+  </defs>
+  <rect width="1200" height="520" fill="url(#bg)" />
+
+  <text x="60" y="50" font-family="Arial, sans-serif" font-size="18" fill="#e2e8f0">Runtime Sequence</text>
+
+  <rect x="80" y="90" width="1040" height="70" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+  <text x="100" y="135" font-family="Arial, sans-serif" font-size="16" fill="#e2e8f0">1. Tauri launches the Go sidecar with PORT=0 and APP_DATA_DIR</text>
+
+  <line x1="600" y1="160" x2="600" y2="190" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)" />
+
+  <rect x="80" y="190" width="1040" height="70" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+  <text x="100" y="235" font-family="Arial, sans-serif" font-size="16" fill="#e2e8f0">2. Backend writes runtime.json with resolved port and paths</text>
+
+  <line x1="600" y1="260" x2="600" y2="290" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)" />
+
+  <rect x="80" y="290" width="1040" height="70" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+  <text x="100" y="335" font-family="Arial, sans-serif" font-size="16" fill="#e2e8f0">3. UI calls get_backend_info, then /health until OK</text>
+
+  <line x1="600" y1="360" x2="600" y2="390" stroke="#38bdf8" stroke-width="3" marker-end="url(#arrow)" />
+
+  <rect x="80" y="390" width="1040" height="70" rx="12" fill="#0f172a" stroke="#38bdf8" stroke-width="2" />
+  <text x="100" y="435" font-family="Arial, sans-serif" font-size="16" fill="#e2e8f0">4. UI becomes active; errors link to log path</text>
+
+  <text x="80" y="490" font-family="Arial, sans-serif" font-size="12" fill="#94a3b8">Shutdown: UI calls /shutdown and Tauri terminates the sidecar</text>
+</svg>

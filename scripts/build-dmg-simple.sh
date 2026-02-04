@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP_PATH="${ROOT_DIR}/desktop/src-tauri/target/release/bundle/macos/ionicX.app"
+APP_PATH="${ROOT_DIR}/apps/desktop/src-tauri/target/release/bundle/macos/ionicX.app"
 
 if [[ ! -d "${APP_PATH}" ]]; then
   echo "App bundle not found at ${APP_PATH}"
@@ -11,7 +11,7 @@ fi
 
 VERSION="$(python3 - <<'PY'
 import json
-with open("desktop/src-tauri/tauri.conf.json", "r", encoding="utf-8") as f:
+with open("apps/desktop/src-tauri/tauri.conf.json", "r", encoding="utf-8") as f:
     print(json.load(f).get("version", "0.1.0"))
 PY
 )"
@@ -22,7 +22,7 @@ case "${ARCH}" in
   x86_64) ARCH="x86_64" ;;
 esac
 
-OUT_DIR="${ROOT_DIR}/desktop/src-tauri/target/release/bundle/dmg"
+OUT_DIR="${ROOT_DIR}/apps/desktop/src-tauri/target/release/bundle/dmg"
 mkdir -p "${OUT_DIR}"
 
 DMG_PATH="${OUT_DIR}/ionicX_${VERSION}_${ARCH}_simple.dmg"

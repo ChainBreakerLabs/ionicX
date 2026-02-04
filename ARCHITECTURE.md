@@ -5,7 +5,7 @@
 ```
 ┌───────────────┐           ┌──────────────────┐           ┌─────────────────────┐
 │ React (Vite)  │  HTTP/WS  │ Tauri (Rust host)│  Sidecar │ Go API (Echo + SQLite)│
-│ ionic-x/      │──────────▶│ desktop/         │──────────▶│ ionic-x-ms/          │
+│ apps/web/     │──────────▶│ apps/desktop/    │──────────▶│ services/api/        │
 └───────────────┘           └──────────────────┘           └─────────────────────┘
          ▲                           │                                 │
          │                           │                                 ▼
@@ -19,7 +19,7 @@
 
 ## Runtime Flow
 
-1. Tauri inicia `ionic-x-ms` como sidecar con `PORT=0` y `APP_DATA_DIR` por OS.
+1. Tauri inicia `services/api` como sidecar con `PORT=0` y `APP_DATA_DIR` por OS.
 2. El backend escribe `runtime.json` con el puerto real y rutas de datos.
 3. El frontend solicita `get_backend_info`, obtiene el puerto y hace `GET /health`.
 4. Si `/health` responde `200`, la UI se habilita; si falla, se muestra el estado y la ruta de logs.
