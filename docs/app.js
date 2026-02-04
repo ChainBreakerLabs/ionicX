@@ -16,53 +16,30 @@ const detectOs = () => {
   return "unknown";
 };
 
-const detectArch = () => {
-  const ua = navigator.userAgent.toLowerCase();
-  if (ua.includes("arm64") || ua.includes("aarch64")) return "arm64";
-  if (ua.includes("x86_64") || ua.includes("amd64") || ua.includes("x64")) return "x64";
-  if (navigator.userAgentData && navigator.userAgentData.architecture) {
-    return navigator.userAgentData.architecture.toLowerCase().includes("arm")
-      ? "arm64"
-      : "x64";
-  }
-  return "x64";
-};
-
-const buildLinks = (os, arch) => {
+const buildLinks = (os) => {
   if (os === "windows") {
-    const winArch = arch === "arm64" ? "arm64" : "x64";
     return {
       label: "Windows",
-      primary: makeLink(`Windows (${winArch.toUpperCase()})`, `ionicx-windows-${winArch}.msi`),
-      secondary: [makeLink("Windows (EXE)", `ionicx-windows-${winArch}.exe`)],
+      primary: makeLink("Windows (x64)", "ionicx-windows-x64.msi"),
+      secondary: [makeLink("Windows (EXE)", "ionicx-windows-x64.exe")],
     };
   }
 
   if (os === "macos") {
-    const macArch = arch === "arm64" ? "arm64" : "x64";
-    const otherArch = macArch === "arm64" ? "x64" : "arm64";
     return {
       label: "macOS",
-      primary: makeLink(`macOS (${macArch})`, `ionicx-macos-${macArch}.dmg`),
-      secondary: [
-        makeLink("macOS (Universal)", "ionicx-macos-universal.dmg"),
-        makeLink(`macOS (${otherArch})`, `ionicx-macos-${otherArch}.dmg`),
-        makeLink(`macOS (${macArch}) .app.zip`, `ionicx-macos-${macArch}.app.zip`),
-      ],
+      primary: makeLink("macOS (Apple Silicon)", "ionicx-macos-arm64.dmg"),
+      secondary: [makeLink("macOS (.app.zip)", "ionicx-macos-arm64.app.zip")],
     };
   }
 
   if (os === "linux") {
-    const isArm = arch === "arm64";
-    const appImageArch = isArm ? "aarch64" : "x86_64";
-    const debArch = isArm ? "arm64" : "amd64";
-    const rpmArch = isArm ? "aarch64" : "x86_64";
     return {
       label: "Linux",
-      primary: makeLink("Linux (AppImage)", `ionicx-linux-${appImageArch}.AppImage`),
+      primary: makeLink("Linux (AppImage)", "ionicx-linux-x86_64.AppImage"),
       secondary: [
-        makeLink("Linux (.deb)", `ionicx-linux-${debArch}.deb`),
-        makeLink("Linux (.rpm)", `ionicx-linux-${rpmArch}.rpm`),
+        makeLink("Linux (.deb)", "ionicx-linux-amd64.deb"),
+        makeLink("Linux (.rpm)", "ionicx-linux-x86_64.rpm"),
       ],
     };
   }
@@ -78,12 +55,11 @@ const buildLinks = (os, arch) => {
 };
 
 const os = detectOs();
-const arch = detectArch();
-const { label, primary, secondary } = buildLinks(os, arch);
+const { label, primary, secondary } = buildLinks(os);
 
-primaryButton.textContent = `Download for ${label}`;
+primaryButton.textContent = `Descargar para ${label}`;
 primaryButton.href = primary.url;
-primarySubtext.textContent = `Latest release • ${primary.file}`;
+primarySubtext.textContent = `Última versión • ${primary.file}`;
 
 secondaryLinks.innerHTML = "";
 secondary
@@ -99,9 +75,7 @@ secondary
 const allLinks = [
   makeLink("Windows (MSI)", "ionicx-windows-x64.msi"),
   makeLink("Windows (EXE)", "ionicx-windows-x64.exe"),
-  makeLink("macOS (arm64 DMG)", "ionicx-macos-arm64.dmg"),
-  makeLink("macOS (x64 DMG)", "ionicx-macos-x64.dmg"),
-  makeLink("macOS (Universal DMG)", "ionicx-macos-universal.dmg"),
+  makeLink("macOS (Apple Silicon DMG)", "ionicx-macos-arm64.dmg"),
   makeLink("macOS (.app.zip)", "ionicx-macos-arm64.app.zip"),
   makeLink("Linux (AppImage)", "ionicx-linux-x86_64.AppImage"),
   makeLink("Linux (.deb)", "ionicx-linux-amd64.deb"),
