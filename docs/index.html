@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>IonicX Desktop | ChainBreakerLabs</title>
+    <meta
+      name="description"
+      content="Download IonicX for Windows, macOS, or Linux. Fast, secure desktop client by ChainBreakerLabs."
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script defer src="app.js"></script>
+  </head>
+  <body data-repo="ChainBreakerLabs/ionicX">
+    <main class="shell">
+      <header class="hero">
+        <div class="badge">ChainBreakerLabs</div>
+        <h1>IonicX Desktop</h1>
+        <p class="lede">
+          A focused desktop build of IonicX with a local Go backend and a fast React UI.
+          Download the latest release for your OS.
+        </p>
+        <div class="cta">
+          <a id="primary-download" class="btn primary" href="#">Download</a>
+          <span id="primary-subtext" class="subtext">Latest release</span>
+        </div>
+        <div class="secondary" id="secondary-links"></div>
+        <noscript>
+          <p class="noscript">
+            JavaScript is required to detect your OS. Use the links below to download manually.
+          </p>
+        </noscript>
+      </header>
+
+      <section class="panel">
+        <h2>Install</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Windows</h3>
+            <p>Run the <span class="mono">.msi</span> installer and keep the defaults.</p>
+          </div>
+          <div class="card">
+            <h3>macOS</h3>
+            <p>Open the <span class="mono">.dmg</span>, drag IonicX to Applications, then launch it.</p>
+          </div>
+          <div class="card">
+            <h3>Linux</h3>
+            <p>
+              Use the <span class="mono">.AppImage</span> for the fastest start, or install the
+              <span class="mono">.deb</span>/<span class="mono">.rpm</span> package.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <h2>Need another format?</h2>
+        <div id="all-downloads" class="links"></div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <span>IonicX by ChainBreakerLabs</span>
+      <span class="mono">releases/latest/download</span>
+    </footer>
+  </body>
+</html>

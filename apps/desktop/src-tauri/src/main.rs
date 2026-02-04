@@ -37,7 +37,6 @@ struct BackendInfo {
 #[derive(Deserialize)]
 struct RuntimeInfo {
     port: u16,
-    addr: String,
     #[serde(rename = "appDataDir")]
     app_data_dir: String,
     #[serde(rename = "logDir")]
