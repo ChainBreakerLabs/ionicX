@@ -35,3 +35,6 @@
 
 - Logs persistidos en `<APP_DATA_DIR>/logs/ionicx.log`.
 - Errores críticos se reflejan en la UI con la ruta del log.
+
+
+

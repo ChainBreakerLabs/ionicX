@@ -1,92 +1,194 @@
 <!doctype html>
 <html lang="es">
   <head>
+    <!-- Meta Tags Esenciales -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>IonicX Desktop | ChainBreakerLabs</title>
-    <meta
-      name="description"
-      content="Descarga IonicX para Windows, macOS o Linux. Plataforma de presentaciones en vivo para iglesias."
-    />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="theme-color" content="#0d1016" />
+
+    <!-- SEO -->
+    <title>IonicX Desktop | Plataforma de Presentaciones en Vivo para Iglesias</title>
+    <meta name="description" content="Descarga IonicX Desktop gratis. Plataforma profesional de presentaciones en vivo para iglesias con Biblia, letras de canciones, portadas de prédicas y proyección en pantalla completa. Compatible con Windows, macOS y Linux." />
+    <meta name="keywords" content="presentaciones, iglesia, biblia, letras, prédicas, software, desktop, multiplataforma" />
+    <meta name="author" content="ChainBreakerLabs" />
+    <link rel="canonical" href="https://chainbreakerlabs.github.io/ionicX/" />
+
+    <!-- Open Graph / Social Media -->
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://chainbreakerlabs.github.io/ionicX/" />
+    <meta property="og:title" content="IonicX Desktop | Presentaciones en Vivo para Iglesias" />
+    <meta property="og:description" content="Plataforma profesional de presentaciones con Biblia, letras, portadas y proyección. Windows, macOS y Linux." />
+    <meta property="og:site_name" content="IonicX" />
+    <meta property="og:locale" content="es_ES" />
+
+    <!-- Twitter Card -->
+    <meta property="twitter:card" content="summary_large_image" />
+    <meta property="twitter:url" content="https://chainbreakerlabs.github.io/ionicX/" />
+    <meta property="twitter:title" content="IonicX Desktop" />
+    <meta property="twitter:description" content="Plataforma de presentaciones en vivo para iglesias" />
+
+    <!-- Favicons -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect fill='%2353e0b5' width='100' height='100' rx='20'/%3E%3Ctext x='50' y='65' font-size='60' font-weight='bold' fill='%230d1016' text-anchor='middle'%3EiX%3C/text%3E%3C/svg%3E" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'%3E%3Crect fill='%2353e0b5' width='180' height='180' rx='40'/%3E%3Ctext x='90' y='120' font-size='100' font-weight='bold' fill='%230d1016' text-anchor='middle'%3EiX%3C/text%3E%3C/svg%3E" />
+
+    <!-- Styles -->
     <link rel="stylesheet" href="styles.css" />
+
+    <!-- Preload crítico -->
+    <link rel="preload" as="font" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" crossorigin />
+
+    <!-- Scripts -->
     <script defer src="app.js"></script>
   </head>
   <body data-repo="ChainBreakerLabs/ionicX">
-    <main class="shell">
-      <header class="hero">
-        <div class="badge">ChainBreakerLabs</div>
+    <!-- Skip to content link para accesibilidad -->
+    <a href="#main-content" class="skip-link">Ir al contenido principal</a>
+
+    <main id="main-content" class="shell">
+      <!-- Hero Section -->
+      <header class="hero" role="banner">
+        <div class="badge" aria-label="Creador: ChainBreakerLabs">ChainBreakerLabs</div>
         <h1>IonicX Desktop</h1>
         <p class="lede">
-          Plataforma de presentaciones en vivo para iglesias: Biblia, letras de canciones,
-          portadas de prédicas y salida en pantalla completa.
+          Plataforma profesional de presentaciones en vivo para iglesias. Gestiona Biblia,
+          letras de canciones, portadas de prédicas y proyección en pantalla completa, todo
+          en un solo lugar.
         </p>
-        <div class="cta">
-          <a id="primary-download" class="btn primary" href="#">Descargar</a>
-          <span id="primary-subtext" class="subtext">Última versión</span>
+
+        <!-- CTA Section -->
+        <div class="cta" role="region" aria-label="Descarga">
+          <a id="primary-download" class="btn primary" href="#" aria-label="Botón de descarga para tu sistema operativo">
+            <span class="btn-icon">⬇</span>
+            <span>Descargar</span>
+          </a>
+          <span id="primary-subtext" class="subtext" aria-live="polite">Detectando tu sistema...</span>
         </div>
-        <div class="secondary" id="secondary-links"></div>
+
+        <!-- Secondary links -->
+        <div class="secondary" id="secondary-links" aria-label="Otras opciones de descarga"></div>
+
+        <!-- Fallback para JavaScript deshabilitado -->
         <noscript>
-          <p class="noscript">
-            Activa JavaScript para detectar tu sistema operativo. Usa los links de abajo
-            si necesitas descargar manualmente.
-          </p>
+          <div class="noscript-warning" role="alert">
+            <p>
+              <strong>⚠ JavaScript deshabilitado:</strong> Para una mejor experiencia,
+              habilita JavaScript. Mientras tanto, puedes descargar desde
+              <a href="https://github.com/ChainBreakerLabs/ionicX/releases/latest">GitHub Releases</a>.
+            </p>
+          </div>
         </noscript>
       </header>
 
-      <section class="panel">
-        <h2>Qué puedes hacer</h2>
-        <div class="grid">
-          <div class="card">
-            <h3>Biblia al instante</h3>
-            <p>Busca versículos y envíalos al modo en vivo con un clic.</p>
+      <!-- Features Section -->
+      <section class="panel" aria-labelledby="features-title">
+        <h2 id="features-title">✨ Qué puedes hacer</h2>
+        <div class="grid" role="list">
+          <article class="card" role="listitem">
+            <h3>📖 Biblia al instante</h3>
+            <p>Busca versículos por referencia y envíalos al modo en vivo con un clic. Acceso instantáneo a toda la Biblia.</p>
+          </article>
+          <article class="card" role="listitem">
+            <h3>🎵 Letras de canciones</h3>
+            <p>Edita, segmenta escenas y controla cada parte de la canción con sincronización perfecta.</p>
+          </article>
+          <article class="card" role="listitem">
+            <h3>🎨 Portadas de prédicas</h3>
+            <p>Crea diseños profesionales con capas, badges, imágenes y efectos en segundos sin necesidad de Photoshop.</p>
+          </article>
+          <article class="card" role="listitem">
+            <h3>🖥 Proyección en vivo</h3>
+            <p>Salida "External Live" a pantalla completa para proyectores. Control total desde tu escritorio.</p>
+          </article>
+        </div>
+      </section>
+
+      <!-- Installation Section -->
+      <section class="panel" aria-labelledby="install-title">
+        <h2 id="install-title">📦 Cómo instalar</h2>
+        <div class="grid" role="list">
+          <article class="card" role="listitem">
+            <h3>🪟 Windows</h3>
+            <p>
+              Descarga el instalador <span class="mono">.msi</span> o <span class="mono">.exe</span>
+              y sigue el asistente de instalación.
+            </p>
+          </article>
+          <article class="card" role="listitem">
+            <h3>🍎 macOS</h3>
+            <p>
+              Abre el archivo <span class="mono">.dmg</span>, arrastra IonicX a la carpeta Aplicaciones
+              y ejecútalo. Compatible con Intel y Apple Silicon.
+            </p>
+          </article>
+          <article class="card" role="listitem">
+            <h3>🐧 Linux</h3>
+            <p>
+              Usa <span class="mono">.AppImage</span> para ejecución portable, o instala el paquete
+              <span class="mono">.deb</span>/<span class="mono">.rpm</span> según tu distribución.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <!-- All Downloads Section -->
+      <section class="panel" aria-labelledby="downloads-title">
+        <h2 id="downloads-title">📥 Todos los formatos</h2>
+        <div id="all-downloads" class="links" aria-label="Lista completa de descargas por plataforma y arquitectura" role="list"></div>
+      </section>
+
+      <!-- System Requirements Section -->
+      <section class="panel system-requirements" aria-labelledby="requirements-title">
+        <h2 id="requirements-title">⚙ Requisitos del sistema</h2>
+        <div class="requirements-grid">
+          <div class="requirement">
+            <strong>Windows 10+</strong>
+            <p>x86_64 (64-bit)</p>
           </div>
-          <div class="card">
-            <h3>Letras de canciones</h3>
-            <p>Edita, segmenta y controla escenas para cada parte de la canción.</p>
+          <div class="requirement">
+            <strong>macOS 11+</strong>
+            <p>Intel (x86_64) o Apple Silicon (ARM64)</p>
           </div>
-          <div class="card">
-            <h3>Portadas de prédicas</h3>
-            <p>Crea diseños con capas, badges e imágenes en segundos.</p>
-          </div>
-          <div class="card">
-            <h3>Proyección</h3>
-            <p>Salida “External Live” a pantalla completa para pantallas externas.</p>
+          <div class="requirement">
+            <strong>Linux</strong>
+            <p>x86_64 o ARM64 • Ubuntu 20.04+</p>
           </div>
         </div>
       </section>
 
-      <section class="panel">
-        <h2>Instalación</h2>
-        <div class="grid">
-          <div class="card">
-            <h3>Windows</h3>
-            <p>Ejecuta el instalador <span class="mono">.msi</span> y sigue el asistente.</p>
+      <!-- Footer Info Section -->
+      <section class="panel info-section">
+        <h2>ℹ Información</h2>
+        <div class="info-grid">
+          <div class="info-card">
+            <h3>🔧 Open Source</h3>
+            <p>Código disponible en <a href="https://github.com/ChainBreakerLabs/ionicX" target="_blank" rel="noopener noreferrer">GitHub</a>. Contribuciones bienvenidas.</p>
           </div>
-          <div class="card">
-            <h3>macOS</h3>
-            <p>
-              Abre el <span class="mono">.dmg</span>, arrastra IonicX a Aplicaciones y ejecútalo.
-            </p>
+          <div class="info-card">
+            <h3>💾 Datos locales</h3>
+            <p>Todos tus datos se almacenan localmente en tu dispositivo. Privacidad garantizada.</p>
           </div>
-          <div class="card">
-            <h3>Linux</h3>
-            <p>
-              Usa el <span class="mono">.AppImage</span> para abrir rápido, o instala el
-              paquete <span class="mono">.deb</span>/<span class="mono">.rpm</span>.
-            </p>
+          <div class="info-card">
+            <h3>🆓 Totalmente gratis</h3>
+            <p>Sin suscripciones, sin límites. Uso personal y eclesiástico sin restricciones.</p>
           </div>
         </div>
-      </section>
-
-      <section class="panel">
-        <h2>Otros formatos</h2>
-        <div id="all-downloads" class="links"></div>
       </section>
     </main>
 
-    <footer class="footer">
-      <span>IonicX by ChainBreakerLabs</span>
-      <span class="mono">releases/latest/download</span>
+    <!-- Footer -->
+    <footer class="footer" role="contentinfo">
+      <div class="footer-content">
+        <span>
+          <strong>IonicX</strong> by
+          <a href="https://github.com/ChainBreakerLabs" target="_blank" rel="noopener noreferrer">ChainBreakerLabs</a>
+        </span>
+        <span class="footer-meta">
+          <a href="https://github.com/ChainBreakerLabs/ionicX/releases/latest" target="_blank" rel="noopener noreferrer">
+            Última versión en GitHub
+          </a>
+        </span>
+      </div>
     </footer>
   </body>
 </html>

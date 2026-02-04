@@ -160,3 +160,6 @@ Plantilla: `services/api/env-example.yml` (vacía, úsala como base si necesitas
 ## Licencia
 
 Pendiente de definir.
+
+
+

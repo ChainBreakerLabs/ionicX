@@ -23,12 +23,20 @@ env:
 
 jobs:
   build:
-    name: Build (${{ matrix.os }})
-    runs-on: ${{ matrix.os }}
+    name: Build (${{ matrix.os }} / ${{ matrix.arch }})
+    runs-on: ${{ matrix.runner }}
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, windows-latest, ubuntu-latest]
+        include:
+          # macOS builds
+          - { os: 'macos', runner: 'macos-latest', arch: 'arm64', goos: 'darwin', goarch: 'arm64' }
+          - { os: 'macos', runner: 'macos-latest', arch: 'x64', goos: 'darwin', goarch: 'amd64' }
+          # Ubuntu/Linux builds
+          - { os: 'linux', runner: 'ubuntu-latest', arch: 'x86_64', goos: 'linux', goarch: 'amd64' }
+          - { os: 'linux', runner: 'ubuntu-latest', arch: 'arm64', goos: 'linux', goarch: 'arm64' }
+          # Windows builds
+          - { os: 'windows', runner: 'windows-latest', arch: 'x64', goos: 'windows', goarch: 'amd64' }
 
     steps:
       - name: Checkout
@@ -79,17 +87,44 @@ jobs:
 
       - name: Build backend (mac/linux)
         if: runner.os != 'Windows'
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
         run: scripts/build-backend.sh
 
       - name: Build backend (windows)
         if: runner.os == 'Windows'
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
         shell: pwsh
         run: scripts/build-backend.ps1
+
+      - name: Generate backend binary checksum (mac/linux)
+        if: runner.os != 'Windows'
+        run: |
+          cd apps/desktop/src-tauri/bin
+          for f in ionicx-api*; do
+            sha256sum "$f" > "${f}.sha256"
+          done
+          ls -la
+
+      - name: Generate backend binary checksum (windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          cd apps/desktop/src-tauri/bin
+          foreach ($file in Get-ChildItem -Filter "ionicx-api*") {
+            $hash = (Get-FileHash -Path $file.FullName -Algorithm SHA256).Hash
+            Set-Content -Path "$($file.Name).sha256" -Value "$hash  $($file.Name)"
+          }
+          Get-ChildItem
 
       - name: Verify backend binary (mac/linux)
         if: runner.os != 'Windows'
         run: |
           test -f apps/desktop/src-tauri/bin/ionicx-api
+          echo "Backend binary verified"
 
       - name: Verify backend binary (windows)
         if: runner.os == 'Windows'
@@ -99,6 +134,7 @@ jobs:
             Write-Error "Backend binary not found at apps/desktop/src-tauri/bin/ionicx-api.exe"
             exit 1
           }
+          Write-Host "Backend binary verified"
 
       - name: Build frontend
         working-directory: apps/web
@@ -136,76 +172,81 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          shopt -s nullglob
-
+          
           OUT_DIR="release-assets"
           BUNDLE_DIR="apps/desktop/src-tauri/target/release/bundle"
           mkdir -p "$OUT_DIR"
-
+          
+          # Detect actual architecture
           if [[ "${RUNNER_OS}" == "macOS" ]]; then
-            arch="$(uname -m)"
-            case "$arch" in
-              arm64) mac_arch="arm64" ;;
-              x86_64) mac_arch="x64" ;;
-              *) mac_arch="$arch" ;;
-            esac
-
-            universal_dmg=("$BUNDLE_DIR"/dmg/*universal*.dmg)
-            if [[ -f "${universal_dmg[0]:-}" ]]; then
-              cp "${universal_dmg[0]}" "$OUT_DIR/ionicx-macos-universal.dmg"
-            else
+            ARCH="${{ matrix.arch }}"
+            OS_LABEL="macos"
+            
+            # Copy DMG files with consistent naming
+            if [[ -f "$BUNDLE_DIR"/dmg/*.dmg ]]; then
               for f in "$BUNDLE_DIR"/dmg/*.dmg; do
-                cp "$f" "$OUT_DIR/ionicx-macos-${mac_arch}.dmg"
+                filename=$(basename "$f")
+                cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.dmg"
+                # Generate checksum
+                (cd "$OUT_DIR" && sha256sum "ionicx-${OS_LABEL}-${ARCH}.dmg" > "ionicx-${OS_LABEL}-${ARCH}.dmg.sha256")
+                echo "Staged: ionicx-${OS_LABEL}-${ARCH}.dmg"
               done
             fi
-
-            for f in "$BUNDLE_DIR"/macos/*.app.zip; do
-              cp "$f" "$OUT_DIR/ionicx-macos-${mac_arch}.app.zip"
-            done
-
-            app_dir=("$BUNDLE_DIR"/macos/*.app)
-            if [[ -d "${app_dir[0]:-}" ]]; then
-              /usr/bin/ditto -c -k --sequesterRsrc --keepParent \
-                "${app_dir[0]}" "$OUT_DIR/ionicx-macos-${mac_arch}.app.zip"
+            
+            # Copy app.zip files
+            if [[ -f "$BUNDLE_DIR"/macos/*.app.zip ]]; then
+              for f in "$BUNDLE_DIR"/macos/*.app.zip; do
+                cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.app.zip"
+                (cd "$OUT_DIR" && sha256sum "ionicx-${OS_LABEL}-${ARCH}.app.zip" > "ionicx-${OS_LABEL}-${ARCH}.app.zip.sha256")
+                echo "Staged: ionicx-${OS_LABEL}-${ARCH}.app.zip"
+              done
             fi
           fi
-
+          
           if [[ "${RUNNER_OS}" == "Linux" ]]; then
-            arch="$(uname -m)"
-            case "$arch" in
-              x86_64)
-                appimage_arch="x86_64"
-                deb_arch="amd64"
-                rpm_arch="x86_64"
-                ;;
-              aarch64|arm64)
-                appimage_arch="aarch64"
-                deb_arch="arm64"
-                rpm_arch="aarch64"
-                ;;
-              *)
-                appimage_arch="$arch"
-                deb_arch="$arch"
-                rpm_arch="$arch"
-                ;;
-            esac
-
-            for f in "$BUNDLE_DIR"/appimage/*.AppImage; do
-              cp "$f" "$OUT_DIR/ionicx-linux-${appimage_arch}.AppImage"
-            done
-            for f in "$BUNDLE_DIR"/deb/*.deb; do
-              cp "$f" "$OUT_DIR/ionicx-linux-${deb_arch}.deb"
-            done
-            for f in "$BUNDLE_DIR"/rpm/*.rpm; do
-              cp "$f" "$OUT_DIR/ionicx-linux-${rpm_arch}.rpm"
-            done
+            ARCH="${{ matrix.arch }}"
+            OS_LABEL="linux"
+            
+            # AppImage
+            if [[ -f "$BUNDLE_DIR"/appimage/*.AppImage ]]; then
+              for f in "$BUNDLE_DIR"/appimage/*.AppImage; do
+                cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.AppImage"
+                chmod +x "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.AppImage"
+                (cd "$OUT_DIR" && sha256sum "ionicx-${OS_LABEL}-${ARCH}.AppImage" > "ionicx-${OS_LABEL}-${ARCH}.AppImage.sha256")
+                echo "Staged: ionicx-${OS_LABEL}-${ARCH}.AppImage"
+              done
+            fi
+            
+            # DEB
+            if [[ -f "$BUNDLE_DIR"/deb/*.deb ]]; then
+              for f in "$BUNDLE_DIR"/deb/*.deb; do
+                cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.deb"
+                (cd "$OUT_DIR" && sha256sum "ionicx-${OS_LABEL}-${ARCH}.deb" > "ionicx-${OS_LABEL}-${ARCH}.deb.sha256")
+                echo "Staged: ionicx-${OS_LABEL}-${ARCH}.deb"
+              done
+            fi
+            
+            # RPM
+            if [[ -f "$BUNDLE_DIR"/rpm/*.rpm ]]; then
+              for f in "$BUNDLE_DIR"/rpm/*.rpm; do
+                cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.rpm"
+                (cd "$OUT_DIR" && sha256sum "ionicx-${OS_LABEL}-${ARCH}.rpm" > "ionicx-${OS_LABEL}-${ARCH}.rpm.sha256")
+                echo "Staged: ionicx-${OS_LABEL}-${ARCH}.rpm"
+              done
+            fi
           fi
-
-          count=$(ls -1 "$OUT_DIR" | wc -l | tr -d ' ')
+          
+          # Validate assets exist
+          count=$(ls -1 "$OUT_DIR"/*.{dmg,deb,rpm,AppImage,app.zip} 2>/dev/null | wc -l | tr -d ' ')
           if [[ "$count" -eq 0 ]]; then
-            echo "No release assets found."
+            echo "ERROR: No release assets found in $BUNDLE_DIR"
+            echo "Contents of $BUNDLE_DIR:"
+            find "$BUNDLE_DIR" -type f -name "*.dmg" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" -o -name "*.app.zip" | head -20
             exit 1
           fi
+          
+          echo "✓ Successfully staged $count assets"
+          ls -lah "$OUT_DIR"
 
       - name: Stage release assets (Windows)
         if: runner.os == 'Windows'
@@ -213,32 +254,83 @@ jobs:
         run: |
           $outDir = "release-assets"
           $bundleDir = "apps/desktop/src-tauri/target/release/bundle"
+          $arch = "${{ matrix.arch }}"
+          $osLabel = "windows"
+          
           New-Item -ItemType Directory -Force -Path $outDir | Out-Null
-
-          $arch = $env:PROCESSOR_ARCHITECTURE
-          if ($arch -eq "ARM64") { $winArch = "arm64" } else { $winArch = "x64" }
-
-          $msi = Get-ChildItem -Path (Join-Path $bundleDir "msi") -Filter *.msi -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($msi) {
-            Copy-Item $msi.FullName (Join-Path $outDir ("ionicx-windows-$winArch.msi")) -Force
+          
+          # MSI
+          $msiFiles = Get-ChildItem -Path (Join-Path $bundleDir "msi") -Filter *.msi -ErrorAction SilentlyContinue
+          foreach ($msi in $msiFiles) {
+            $destName = "ionicx-${osLabel}-${arch}.msi"
+            $dest = Join-Path $outDir $destName
+            Copy-Item $msi.FullName $dest -Force
+            
+            # Generate checksum
+            $hash = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
+            Set-Content -Path "${dest}.sha256" -Value "$hash  $destName"
+            Write-Host "Staged: $destName"
           }
-
-          $exe = Get-ChildItem -Path (Join-Path $bundleDir "nsis") -Filter *.exe -ErrorAction SilentlyContinue | Select-Object -First 1
-          if ($exe) {
-            Copy-Item $exe.FullName (Join-Path $outDir ("ionicx-windows-$winArch.exe")) -Force
+          
+          # NSIS EXE
+          $exeFiles = Get-ChildItem -Path (Join-Path $bundleDir "nsis") -Filter *.exe -ErrorAction SilentlyContinue
+          foreach ($exe in $exeFiles) {
+            $destName = "ionicx-${osLabel}-${arch}.exe"
+            $dest = Join-Path $outDir $destName
+            Copy-Item $exe.FullName $dest -Force
+            
+            # Generate checksum
+            $hash = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
+            Set-Content -Path "${dest}.sha256" -Value "$hash  $destName"
+            Write-Host "Staged: $destName"
           }
-
-          $count = (Get-ChildItem -Path $outDir -File -ErrorAction SilentlyContinue | Measure-Object).Count
+          
+          # Validate assets
+          $count = (Get-ChildItem -Path $outDir -File -Filter "ionicx-*" -ErrorAction SilentlyContinue | Measure-Object).Count
           if ($count -eq 0) {
-            Write-Error "No release assets found."
+            Write-Error "No release assets found"
+            Write-Host "Contents of $bundleDir:"
+            Get-ChildItem -Path $bundleDir -Recurse | Select-Object FullName
             exit 1
           }
+          
+          Write-Host "✓ Successfully staged $count assets"
+          Get-ChildItem -Path $outDir | ForEach-Object { Write-Host $_.FullName }
+
+      - name: Validate release assets before upload
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "📋 Validating release assets..."
+          
+          if [[ ! -d "release-assets" ]]; then
+            echo "ERROR: release-assets directory not found"
+            exit 1
+          fi
+          
+          count=$(ls -1 release-assets/ | wc -l)
+          if [[ $count -eq 0 ]]; then
+            echo "ERROR: No files in release-assets"
+            exit 1
+          fi
+          
+          # Validate file sizes
+          echo "📦 Asset summary:"
+          du -sh release-assets/*
+          
+          # Verify checksums exist
+          echo "✓ Checksums:"
+          find release-assets -name "*.sha256" | head -10
+          
+          echo "✓ Ready to upload $count artifacts"
 
       - name: Upload installers
         uses: actions/upload-artifact@v4
         with:
-          name: ionicx-${{ matrix.os }}
+          name: ionicx-${{ matrix.os }}-${{ matrix.arch }}
           path: release-assets/*
+          retention-days: 30
+          if-no-files-found: error
 
   release:
     name: Release
@@ -248,14 +340,69 @@ jobs:
       contents: write
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           path: release-assets
           merge-multiple: true
 
-      - name: List assets
-        run: ls -la release-assets
+      - name: Organize and validate assets
+        run: |
+          set -euo pipefail
+          echo "📦 Downloaded artifacts:"
+          ls -lah release-assets/ || true
+          
+          # Count assets by OS
+          echo ""
+          echo "📊 Assets by platform:"
+          for os in macos linux windows; do
+            count=$(find release-assets -name "*$os*" -type f ! -name "*.sha256" | wc -l)
+            if [[ $count -gt 0 ]]; then
+              echo "  $os: $count assets"
+            fi
+          done
+          
+          # Verify integrity
+          echo ""
+          echo "✓ Verifying integrity..."
+          cd release-assets
+          for f in *.sha256; do
+            if [[ -f "$f" ]]; then
+              base="${f%.sha256}"
+              if [[ -f "$base" ]]; then
+                if sha256sum -c "$f" > /dev/null 2>&1; then
+                  echo "  ✓ $base"
+                else
+                  echo "  ❌ FAILED: $base"
+                  exit 1
+                fi
+              fi
+            fi
+          done
+          cd ..
+
+      - name: Generate checksum manifest
+        run: |
+          cd release-assets
+          cat > CHECKSUMS.txt << EOF
+          # ionicX ${{ env.RELEASE_TAG }} - Checksums
+          # Generated: $(date -u)
+          
+          ## macOS
+          EOF
+          
+          find . -name "ionicx-macos-*" -not -name "*.sha256" | sort >> CHECKSUMS.txt
+          echo "" >> CHECKSUMS.txt
+          echo "## Linux" >> CHECKSUMS.txt
+          find . -name "ionicx-linux-*" -not -name "*.sha256" | sort >> CHECKSUMS.txt
+          echo "" >> CHECKSUMS.txt
+          echo "## Windows" >> CHECKSUMS.txt
+          find . -name "ionicx-windows-*" -not -name "*.sha256" | sort >> CHECKSUMS.txt
+          
+          cd ..
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -264,3 +411,24 @@ jobs:
           generate_release_notes: true
           files: |
             release-assets/*
+          body: |
+            ## 📥 Download ionicX ${{ env.RELEASE_TAG }}
+            
+            ### 🍎 macOS
+            - **ARM64 (Apple Silicon)**: `ionicx-macos-arm64.dmg`
+            - **x64 (Intel)**: `ionicx-macos-x64.dmg`
+            
+            ### 🐧 Linux
+            - **x86_64**: `ionicx-linux-x86_64.AppImage` or `.deb`
+            - **ARM64**: `ionicx-linux-arm64.AppImage` or `.deb`
+            
+            ### 🪟 Windows
+            - **x64**: `ionicx-windows-x64.exe` or `.msi`
+            
+            ### ✅ Verify Integrity
+            All files include SHA256 checksums. Download and verify:
+            ```bash
+            sha256sum -c *.sha256
+            ```
+            
+            See [all checksums](https://github.com/${{ github.repository }}/releases/download/${{ env.RELEASE_TAG }}/CHECKSUMS.txt)

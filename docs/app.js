@@ -8,13 +8,20 @@ const secondaryLinks = document.getElementById("secondary-links");
 const allDownloads = document.getElementById("all-downloads");
 
 const fallbackAssets = [
+  // Windows
   "ionicx-windows-x64.msi",
   "ionicx-windows-x64.exe",
+  // macOS
   "ionicx-macos-arm64.dmg",
   "ionicx-macos-arm64.app.zip",
+  "ionicx-macos-x64.dmg",
+  "ionicx-macos-x64.app.zip",
+  // Linux
   "ionicx-linux-x86_64.AppImage",
-  "ionicx-linux-amd64.deb",
+  "ionicx-linux-x86_64.deb",
   "ionicx-linux-x86_64.rpm",
+  "ionicx-linux-arm64.AppImage",
+  "ionicx-linux-arm64.deb",
 ];
 
 const detectOs = () => {
@@ -29,31 +36,37 @@ const titleCase = (value) => value.charAt(0).toUpperCase() + value.slice(1);
 
 const parseAsset = (name) => {
   const patterns = [
-    { re: /^ionicx-windows-(.+)\.msi$/i, os: "windows", type: "MSI" },
-    { re: /^ionicx-windows-(.+)\.exe$/i, os: "windows", type: "EXE" },
-    { re: /^ionicx-macos-(.+)\.dmg$/i, os: "macos", type: "DMG" },
-    { re: /^ionicx-macos-(.+)\.app\.zip$/i, os: "macos", type: "APP" },
-    { re: /^ionicx-linux-(.+)\.AppImage$/i, os: "linux", type: "AppImage" },
-    { re: /^ionicx-linux-(.+)\.deb$/i, os: "linux", type: "DEB" },
-    { re: /^ionicx-linux-(.+)\.rpm$/i, os: "linux", type: "RPM" },
+    // Windows
+    { re: /^ionicx-windows-x64\.msi$/i, os: "windows", arch: "x64", type: "MSI" },
+    { re: /^ionicx-windows-x64\.exe$/i, os: "windows", arch: "x64", type: "EXE" },
+    // macOS
+    { re: /^ionicx-macos-arm64\.dmg$/i, os: "macos", arch: "arm64", type: "DMG" },
+    { re: /^ionicx-macos-arm64\.app\.zip$/i, os: "macos", arch: "arm64", type: "APP" },
+    { re: /^ionicx-macos-x64\.dmg$/i, os: "macos", arch: "x64", type: "DMG" },
+    { re: /^ionicx-macos-x64\.app\.zip$/i, os: "macos", arch: "x64", type: "APP" },
+    // Linux
+    { re: /^ionicx-linux-x86_64\.AppImage$/i, os: "linux", arch: "x86_64", type: "AppImage" },
+    { re: /^ionicx-linux-x86_64\.deb$/i, os: "linux", arch: "x86_64", type: "DEB" },
+    { re: /^ionicx-linux-x86_64\.rpm$/i, os: "linux", arch: "x86_64", type: "RPM" },
+    { re: /^ionicx-linux-arm64\.AppImage$/i, os: "linux", arch: "arm64", type: "AppImage" },
+    { re: /^ionicx-linux-arm64\.deb$/i, os: "linux", arch: "arm64", type: "DEB" },
   ];
 
-  for (const { re, os, type } of patterns) {
-    const match = name.match(re);
-    if (match) {
-      const arch = match[1];
+  for (const { re, os, arch, type } of patterns) {
+    if (re.test(name)) {
       const osLabel = os === "macos" ? "macOS" : titleCase(os);
       const archLabel = arch ? ` ${arch}` : "";
-      const typeLabel = type === "APP" ? ".app.zip" : type;
+      const typeLabel = type;
       return {
         name,
         os,
+        arch,
         label: `${osLabel} (${typeLabel}${archLabel ? ` •${archLabel}` : ""})`,
       };
     }
   }
 
-  return { name, os: "unknown", label: name };
+  return { name, os: "unknown", arch: "unknown", label: name };
 };
 
 const preferenceOrder = {
@@ -105,22 +118,39 @@ const loadAssets = async () => {
 };
 
 const boot = async () => {
-  const os = detectOs();
-  const assetNames = await loadAssets();
-  const assets = assetNames.map((name) => parseAsset(name));
+  try {
+    const os = detectOs();
+    const assetNames = await loadAssets();
+    const assets = assetNames.map((name) => parseAsset(name));
 
-  const primary = pickPrimary(os, assets);
-  primaryButton.textContent = `Descargar para ${primary.os === "unknown" ? "tu sistema" : primary.os === "macos" ? "macOS" : titleCase(primary.os)}`;
-  primaryButton.href = `${baseUrl}${primary.name}`;
-  primarySubtext.textContent = `Disponible ahora • ${primary.name}`;
+    const primary = pickPrimary(os, assets);
 
-  const secondary = assets.filter((asset) => asset.name !== primary.name && asset.os === primary.os);
-  if (secondary.length === 0) {
-    secondary.push(...assets.filter((asset) => asset.name !== primary.name).slice(0, 3));
+    if (primary.os === "unknown") {
+      primaryButton.textContent = "Descargar IonicX";
+      primaryButton.href = "#";
+      primaryButton.disabled = true;
+    } else {
+      const osDisplay = primary.os === "macos" ? "macOS" : titleCase(primary.os);
+      const archDisplay = primary.arch && primary.arch !== "unknown" ? ` (${primary.arch})` : "";
+      primaryButton.textContent = `Descargar para ${osDisplay}${archDisplay}`;
+      primaryButton.href = `${baseUrl}${primary.name}`;
+    }
+
+    primarySubtext.textContent = `Última versión • ${primary.name}`;
+
+    const secondary = assets.filter((asset) => asset.name !== primary.name && asset.os === primary.os);
+    if (secondary.length === 0) {
+      secondary.push(...assets.filter((asset) => asset.name !== primary.name).slice(0, 3));
+    }
+    renderLinks(secondaryLinks, secondary);
+
+    renderLinks(allDownloads, assets);
+  } catch (error) {
+    console.error("Error al cargar assets:", error);
+    primaryButton.textContent = "Descargar IonicX";
+    primaryButton.href = "https://github.com/ChainBreakerLabs/ionicX/releases/latest";
+    primarySubtext.textContent = "Ver releases en GitHub";
   }
-  renderLinks(secondaryLinks, secondary);
-
-  renderLinks(allDownloads, assets);
 };
 
 boot();
