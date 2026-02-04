@@ -1,12 +1,21 @@
 const repo = document.body.dataset.repo || "ChainBreakerLabs/ionicX";
 const baseUrl = `https://github.com/${repo}/releases/latest/download/`;
+const apiUrl = `https://api.github.com/repos/${repo}/releases/latest`;
 
 const primaryButton = document.getElementById("primary-download");
 const primarySubtext = document.getElementById("primary-subtext");
 const secondaryLinks = document.getElementById("secondary-links");
 const allDownloads = document.getElementById("all-downloads");
 
-const makeLink = (label, file) => ({ label, url: `${baseUrl}${file}`, file });
+const fallbackAssets = [
+  "ionicx-windows-x64.msi",
+  "ionicx-windows-x64.exe",
+  "ionicx-macos-arm64.dmg",
+  "ionicx-macos-arm64.app.zip",
+  "ionicx-linux-x86_64.AppImage",
+  "ionicx-linux-amd64.deb",
+  "ionicx-linux-x86_64.rpm",
+];
 
 const detectOs = () => {
   const ua = navigator.userAgent.toLowerCase();
@@ -16,77 +25,102 @@ const detectOs = () => {
   return "unknown";
 };
 
-const buildLinks = (os) => {
-  if (os === "windows") {
-    return {
-      label: "Windows",
-      primary: makeLink("Windows (x64)", "ionicx-windows-x64.msi"),
-      secondary: [makeLink("Windows (EXE)", "ionicx-windows-x64.exe")],
-    };
+const titleCase = (value) => value.charAt(0).toUpperCase() + value.slice(1);
+
+const parseAsset = (name) => {
+  const patterns = [
+    { re: /^ionicx-windows-(.+)\.msi$/i, os: "windows", type: "MSI" },
+    { re: /^ionicx-windows-(.+)\.exe$/i, os: "windows", type: "EXE" },
+    { re: /^ionicx-macos-(.+)\.dmg$/i, os: "macos", type: "DMG" },
+    { re: /^ionicx-macos-(.+)\.app\.zip$/i, os: "macos", type: "APP" },
+    { re: /^ionicx-linux-(.+)\.AppImage$/i, os: "linux", type: "AppImage" },
+    { re: /^ionicx-linux-(.+)\.deb$/i, os: "linux", type: "DEB" },
+    { re: /^ionicx-linux-(.+)\.rpm$/i, os: "linux", type: "RPM" },
+  ];
+
+  for (const { re, os, type } of patterns) {
+    const match = name.match(re);
+    if (match) {
+      const arch = match[1];
+      const osLabel = os === "macos" ? "macOS" : titleCase(os);
+      const archLabel = arch ? ` ${arch}` : "";
+      const typeLabel = type === "APP" ? ".app.zip" : type;
+      return {
+        name,
+        os,
+        label: `${osLabel} (${typeLabel}${archLabel ? ` •${archLabel}` : ""})`,
+      };
+    }
   }
 
-  if (os === "macos") {
-    return {
-      label: "macOS",
-      primary: makeLink("macOS (Apple Silicon)", "ionicx-macos-arm64.dmg"),
-      secondary: [makeLink("macOS (.app.zip)", "ionicx-macos-arm64.app.zip")],
-    };
-  }
-
-  if (os === "linux") {
-    return {
-      label: "Linux",
-      primary: makeLink("Linux (AppImage)", "ionicx-linux-x86_64.AppImage"),
-      secondary: [
-        makeLink("Linux (.deb)", "ionicx-linux-amd64.deb"),
-        makeLink("Linux (.rpm)", "ionicx-linux-x86_64.rpm"),
-      ],
-    };
-  }
-
-  return {
-    label: "Desktop",
-    primary: makeLink("Windows (MSI)", "ionicx-windows-x64.msi"),
-    secondary: [
-      makeLink("macOS (DMG)", "ionicx-macos-arm64.dmg"),
-      makeLink("Linux (AppImage)", "ionicx-linux-x86_64.AppImage"),
-    ],
-  };
+  return { name, os: "unknown", label: name };
 };
 
-const os = detectOs();
-const { label, primary, secondary } = buildLinks(os);
+const preferenceOrder = {
+  windows: [".msi", ".exe"],
+  macos: [".dmg", ".app.zip"],
+  linux: [".AppImage", ".deb", ".rpm"],
+};
 
-primaryButton.textContent = `Descargar para ${label}`;
-primaryButton.href = primary.url;
-primarySubtext.textContent = `Última versión • ${primary.file}`;
+const pickPrimary = (os, assets) => {
+  const candidates = assets.filter((asset) => asset.os === os);
+  if (candidates.length === 0) return assets[0];
 
-secondaryLinks.innerHTML = "";
-secondary
-  .filter((link) => link.file !== primary.file)
-  .forEach((link) => {
+  const order = preferenceOrder[os] || [];
+  for (const ext of order) {
+    const found = candidates.find((asset) => asset.name.endsWith(ext));
+    if (found) return found;
+  }
+  return candidates[0];
+};
+
+const renderLinks = (container, items) => {
+  container.innerHTML = "";
+  items.forEach((asset) => {
     const a = document.createElement("a");
-    a.href = link.url;
-    a.textContent = link.label;
+    a.href = `${baseUrl}${asset.name}`;
+    a.textContent = `${asset.label} — ${asset.name}`;
     a.rel = "noopener";
-    secondaryLinks.appendChild(a);
+    container.appendChild(a);
   });
+};
 
-const allLinks = [
-  makeLink("Windows (MSI)", "ionicx-windows-x64.msi"),
-  makeLink("Windows (EXE)", "ionicx-windows-x64.exe"),
-  makeLink("macOS (Apple Silicon DMG)", "ionicx-macos-arm64.dmg"),
-  makeLink("macOS (.app.zip)", "ionicx-macos-arm64.app.zip"),
-  makeLink("Linux (AppImage)", "ionicx-linux-x86_64.AppImage"),
-  makeLink("Linux (.deb)", "ionicx-linux-amd64.deb"),
-  makeLink("Linux (.rpm)", "ionicx-linux-x86_64.rpm"),
-];
+const loadAssets = async () => {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 4000);
+    const response = await fetch(apiUrl, {
+      signal: controller.signal,
+      headers: { Accept: "application/vnd.github+json" },
+    });
+    clearTimeout(timeout);
 
-allDownloads.innerHTML = "";
-allLinks.forEach((link) => {
-  const a = document.createElement("a");
-  a.href = link.url;
-  a.textContent = link.label;
-  a.rel = "noopener";
-  allDownloads.appendChild(a);
-});
+    if (!response.ok) throw new Error(`GitHub API error: ${response.status}`);
+    const data = await response.json();
+    const names = (data.assets || []).map((asset) => asset.name).filter(Boolean);
+    return names.length ? names : fallbackAssets;
+  } catch (error) {
+    return fallbackAssets;
+  }
+};
+
+const boot = async () => {
+  const os = detectOs();
+  const assetNames = await loadAssets();
+  const assets = assetNames.map((name) => parseAsset(name));
+
+  const primary = pickPrimary(os, assets);
+  primaryButton.textContent = `Descargar para ${primary.os === "unknown" ? "tu sistema" : primary.os === "macos" ? "macOS" : titleCase(primary.os)}`;
+  primaryButton.href = `${baseUrl}${primary.name}`;
+  primarySubtext.textContent = `Disponible ahora • ${primary.name}`;
+
+  const secondary = assets.filter((asset) => asset.name !== primary.name && asset.os === primary.os);
+  if (secondary.length === 0) {
+    secondary.push(...assets.filter((asset) => asset.name !== primary.name).slice(0, 3));
+  }
+  renderLinks(secondaryLinks, secondary);
+
+  renderLinks(allDownloads, assets);
+};
+
+boot();
