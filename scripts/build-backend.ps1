@@ -30,7 +30,7 @@ if ($goos -eq "windows") {
     }
 }
 
-$outputBase = "ionic-x-ms"
+$outputBase = "ionicx-api"
 $outputName = "$outputBase.exe"
 $outputNameWithTarget = "$outputBase-$targetTriple.exe"
 

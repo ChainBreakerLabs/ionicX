@@ -5,7 +5,7 @@ export type BackendInfo = {
   dataDir?: string;
 };
 
-export const API_PATH_PREFIX = "/api/ionic-x-ms";
+export const API_PATH_PREFIX = "/api/ionicx";
 
 const DEFAULT_BACKEND_ORIGIN = "http://127.0.0.1:3000";
 

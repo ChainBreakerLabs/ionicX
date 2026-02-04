@@ -110,7 +110,7 @@ func setupBibleHandlerFixture(t *testing.T) *bibleHandlerFixture {
 	action := mocks.NewMockBibleActionInterface(ctrl)
 
 	return &bibleHandlerFixture{
-		handler: handlers.NewBibleHandler(action, "uploads/videos", "uploads/images", "/api/ionic-x-ms"),
+		handler: handlers.NewBibleHandler(action, "uploads/videos", "uploads/images", "/api/ionicx"),
 		action:  action,
 	}
 }

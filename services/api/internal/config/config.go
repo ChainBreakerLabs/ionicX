@@ -56,7 +56,7 @@ func Load() Config {
 		AppDataDir:   appDataDir,
 		HTTPAddr:     httpAddr,
 		Port:         port,
-		PathPrefix:   env("PATH_PREFIX", "/ionic-x-ms"),
+		PathPrefix:   env("PATH_PREFIX", "/ionicx"),
 		StaticDir:    env("STATIC_DIR", ""),
 		UploadDir:    env("UPLOAD_DIR", ""),
 		LogDir:       env("LOG_DIR", ""),

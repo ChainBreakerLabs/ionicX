@@ -35,7 +35,7 @@ case "${GOOS_VALUE}" in
     ;;
 esac
 
-OUTPUT_BASE="ionic-x-ms"
+OUTPUT_BASE="ionicx-api"
 OUTPUT_NAME="${OUTPUT_BASE}"
 OUTPUT_NAME_WITH_TARGET="${OUTPUT_BASE}-${TARGET_TRIPLE}"
 

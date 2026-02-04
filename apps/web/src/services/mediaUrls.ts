@@ -12,7 +12,7 @@ export function ensureAbsoluteUrl(url?: string | null, origin?: string | null) {
       const originUrl = new URL(origin);
       const isLocalHost =
         parsed.hostname === "127.0.0.1" || parsed.hostname === "localhost" || parsed.hostname === "tauri.localhost";
-      if (isLocalHost && parsed.pathname.startsWith("/api/ionic-x-ms/")) {
+      if (isLocalHost && parsed.pathname.startsWith("/api/ionicx/")) {
         if (parsed.origin !== originUrl.origin) {
           return `${originUrl.origin}${parsed.pathname}${parsed.search}${parsed.hash}`;
         }

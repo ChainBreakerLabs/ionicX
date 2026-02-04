@@ -11,7 +11,7 @@
       "identifier": "shell:allow-spawn",
       "allow": [
         {
-          "name": "ionic-x-ms",
+          "name": "ionicx-api",
           "sidecar": true,
           "args": true
         }

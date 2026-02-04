@@ -152,7 +152,7 @@ fn ensure_sidecar(
             log_level
         ),
     );
-    if let Ok(path) = resolve_sidecar_path("ionic-x-ms") {
+    if let Ok(path) = resolve_sidecar_path("ionicx-api") {
         log_to_file(data_dir, &format!("ensure_sidecar: resolved sidecar path {}", path.display()));
         if !path.exists() {
             log_to_file(data_dir, "ensure_sidecar: sidecar binary missing");
@@ -161,7 +161,7 @@ fn ensure_sidecar(
 
     let mut cmd = app
         .shell()
-        .sidecar("ionic-x-ms")
+        .sidecar("ionicx-api")
         .map_err(|e| format!("No se pudo preparar el backend: {e}"))?;
     cmd = cmd.env("APP_DATA_DIR", data_dir.to_string_lossy().to_string());
     cmd = cmd.env("PORT", "0");
@@ -384,7 +384,7 @@ fn send_shutdown(port: u16) -> Result<(), String> {
     stream
         .set_read_timeout(Some(Duration::from_secs(2)))
         .map_err(|_| "timeout failed".to_string())?;
-    let request = b"POST /api/ionic-x-ms/shutdown HTTP/1.1\r\nHost: 127.0.0.1\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
+    let request = b"POST /api/ionicx/shutdown HTTP/1.1\r\nHost: 127.0.0.1\r\nContent-Length: 0\r\nConnection: close\r\n\r\n";
     stream
         .write_all(request)
         .map_err(|_| "write failed".to_string())?;
