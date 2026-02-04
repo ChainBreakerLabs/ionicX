@@ -1,0 +1,125 @@
+@import "./fonts.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 40 40% 98%;
+    --foreground: 216 25% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    --primary: 210 40% 18%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 30 32% 92%;
+    --secondary-foreground: 216 25% 12%;
+
+    --muted: 40 30% 94%;
+    --muted-foreground: 216 12% 42%;
+
+    --accent: 160 35% 92%;
+    --accent-foreground: 216 25% 12%;
+
+    --destructive: 0 72% 56%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 215 24% 88%;
+    --input: 215 24% 88%;
+    --ring: 195 82% 33%;
+
+    --radius: 0.5rem;
+
+    --brand-from: #ff6b6b;
+    --brand-to: #4ecdc4;
+  }
+
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
+
+  html {
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    margin: 0;
+    overflow-x: hidden;
+    background:
+      radial-gradient(1200px circle at 10% -20%, rgba(255, 214, 165, 0.35) 0%, transparent 55%),
+      radial-gradient(900px circle at 90% 0%, rgba(76, 205, 196, 0.2) 0%, transparent 45%),
+      radial-gradient(900px circle at 0% 90%, rgba(255, 107, 107, 0.12) 0%, transparent 50%),
+      #f7f5f2;
+    color: #0f172a;
+    font-family: "Space Grotesk", "Inter", "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue",
+      Arial, sans-serif;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  #root {
+    min-height: 100vh;
+  }
+
+  img,
+  video {
+    display: block;
+  }
+
+  video {
+    background-color: #000;
+  }
+}
+
+@layer utilities {
+  .text-brand-gradient {
+    background: linear-gradient(90deg, var(--brand-from), var(--brand-to));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(14px);
+  }
+
+  @supports not (backdrop-filter: blur(1px)) {
+    .glass-panel {
+      background: rgba(255, 255, 255, 0.95);
+    }
+  }
+}
+
+@layer components {
+  .select-control {
+    @apply w-full rounded-xl border border-slate-200 bg-white/85 px-3 pr-10 text-sm text-slate-700 shadow-sm transition;
+    @apply focus:outline-none focus:ring-2 focus:ring-emerald-400/40 focus:border-emerald-400;
+    @apply disabled:cursor-not-allowed disabled:opacity-60;
+    appearance: none;
+    background-image:
+      linear-gradient(45deg, transparent 50%, rgba(100, 116, 139, 0.9) 50%),
+      linear-gradient(135deg, rgba(100, 116, 139, 0.9) 50%, transparent 50%);
+    background-position:
+      calc(100% - 18px) calc(50% - 2px),
+      calc(100% - 12px) calc(50% - 2px);
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+  }
+
+  .select-control option {
+    color: #0f172a;
+  }
+}

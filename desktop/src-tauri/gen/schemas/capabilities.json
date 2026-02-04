@@ -1,0 +1,1 @@
+{"main-capability":{"identifier":"main-capability","description":"Capability for the main window","local":true,"windows":["main"],"permissions":["core:default","core:window:allow-create","shell:default",{"identifier":"shell:allow-spawn","allow":[{"args":true,"name":"ionic-x-ms","sidecar":true}]}]}}

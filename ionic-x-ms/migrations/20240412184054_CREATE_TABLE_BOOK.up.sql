@@ -1,0 +1,5 @@
+CREATE TABLE books
+(
+    name  VARCHAR(60) PRIMARY KEY,
+    title VARCHAR(60) NOT NULL
+);

@@ -1,0 +1,37 @@
+project_name: ionic-x
+
+dist: ../release/goreleaser
+
+before:
+  hooks:
+    - ./scripts/stage-release.sh
+
+builds:
+  - id: ionic-x
+    main: ./cmd
+    binary: ionic-x
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+      - darwin
+    goarch:
+      - amd64
+      - arm64
+
+archives:
+  - id: ionic-x
+    builds:
+      - ionic-x
+    format: tar.gz
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    files:
+      - ../release/stage/ionic-x/public/**
+      - ../release/stage/ionic-x/bible.sqlite
+      - ../release/stage/ionic-x/scripts/start.sh
+      - ../release/stage/ionic-x/scripts/start.cmd
+      - ../release/stage/ionic-x/scripts/start.ps1
+
+checksum:
+  name_template: "checksums.txt"

@@ -1,0 +1,45 @@
+# OS / Editor
+.DS_Store
+.idea/
+.vscode/
+
+# Node
+node_modules/
+**/node_modules/
+.npm/
+.pnp.*
+yarn-error.log*
+pnpm-debug.log*
+npm-debug.log*
+
+# Build artifacts
+ionic-x/dist/
+ionic-x/.vite/
+ionic-x-ms/dist/
+desktop/src-tauri/target/
+release/
+.tools/
+
+# Binaries / installers
+*.exe
+*.dll
+*.pkg
+*.dmg
+*.deb
+*.rpm
+*.AppImage
+*.msi
+*.tar.gz
+*.zip
+
+# Runtime data
+uploads/
+**/uploads/
+*.sqlite
+
+# Logs
+*.log
+
+# Env
+.env
+.env.*

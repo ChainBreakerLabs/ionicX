@@ -1,0 +1,93 @@
+name: release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.21"
+
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install Linux dependencies
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf
+
+      - name: Install frontend deps
+        run: npm ci --prefix ionic-x
+
+      - name: Install desktop deps
+        run: npm install --prefix desktop --no-fund --no-audit
+
+      - name: Build backend (mac/linux)
+        if: runner.os != 'Windows'
+        run: scripts/build-backend.sh
+
+      - name: Build backend (windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: scripts/build-backend.ps1
+
+      - name: Build frontend
+        run: npm run build --prefix ionic-x
+
+      - name: Build desktop
+        run: npm run tauri build --prefix desktop
+
+      # Optional macOS signing + notarization (requires secrets)
+      # - name: Import signing cert
+      #   if: runner.os == 'macOS'
+      #   uses: apple-actions/import-codesign-certs@v3
+      #   with:
+      #     p12-file-base64: ${{ secrets.MACOS_CERT_P12 }}
+      #     p12-password: ${{ secrets.MACOS_CERT_PASSWORD }}
+      # - name: Notarize
+      #   if: runner.os == 'macOS'
+      #   run: |
+      #     xcrun notarytool submit <path-to-dmg> \
+      #       --apple-id "${{ secrets.MACOS_APPLE_ID }}" \
+      #       --team-id "${{ secrets.MACOS_TEAM_ID }}" \
+      #       --password "${{ secrets.MACOS_APP_SPECIFIC_PASSWORD }}" \
+      #       --wait
+
+      # Optional Windows code signing (requires secrets)
+      # - name: Sign Windows artifacts
+      #   if: runner.os == 'Windows'
+      #   shell: pwsh
+      #   run: |
+      #     signtool.exe sign /fd sha256 /a /f $env:WINDOWS_CERT_PFX /p $env:WINDOWS_CERT_PASSWORD <path-to-msi-or-exe>
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ionicx-${{ matrix.os }}
+          path: |
+            desktop/src-tauri/target/release/bundle/**/*
