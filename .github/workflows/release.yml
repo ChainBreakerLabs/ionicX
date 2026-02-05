@@ -25,6 +25,7 @@ jobs:
   build:
     name: Build (${{ matrix.os }} / ${{ matrix.arch }})
     runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
@@ -32,9 +33,12 @@ jobs:
           # macOS builds (native runners per arch)
           - { os: 'macos', runner: 'macos-14', arch: 'arm64', goos: 'darwin', goarch: 'arm64' }
           - { os: 'macos', runner: 'macos-15-intel', arch: 'x64', goos: 'darwin', goarch: 'amd64' }
-          # Ubuntu/Linux builds (native runners per arch)
-          - { os: 'linux', runner: 'ubuntu-latest', arch: 'x86_64', goos: 'linux', goarch: 'amd64' }
-          - { os: 'linux', runner: 'ubuntu-24.04-arm64', arch: 'arm64', goos: 'linux', goarch: 'arm64' }
+
+          # Ubuntu/Linux builds
+          - { os: 'linux', runner: 'ubuntu-latest',  arch: 'x86_64', goos: 'linux',  goarch: 'amd64' }
+          # ✅ FIX: correct ARM64 runner label (was ubuntu-24.04-arm64)
+          - { os: 'linux', runner: 'ubuntu-24.04-arm', arch: 'arm64',  goos: 'linux',  goarch: 'arm64' }
+
           # Windows builds
           - { os: 'windows', runner: 'windows-latest', arch: 'x64', goos: 'windows', goarch: 'amd64' }
 
@@ -159,29 +163,6 @@ jobs:
         working-directory: apps/desktop
         run: npm run tauri build
 
-      # Optional macOS signing + notarization (requires secrets)
-      # - name: Import signing cert
-      #   if: runner.os == 'macOS'
-      #   uses: apple-actions/import-codesign-certs@v3
-      #   with:
-      #     p12-file-base64: ${{ secrets.MACOS_CERT_P12 }}
-      #     p12-password: ${{ secrets.MACOS_CERT_PASSWORD }}
-      # - name: Notarize
-      #   if: runner.os == 'macOS'
-      #   run: |
-      #     xcrun notarytool submit <path-to-dmg> \
-      #       --apple-id "${{ secrets.MACOS_APPLE_ID }}" \
-      #       --team-id "${{ secrets.MACOS_TEAM_ID }}" \
-      #       --password "${{ secrets.MACOS_APP_SPECIFIC_PASSWORD }}" \
-      #       --wait
-
-      # Optional Windows code signing (requires secrets)
-      # - name: Sign Windows artifacts
-      #   if: runner.os == 'Windows'
-      #   shell: pwsh
-      #   run: |
-      #     signtool.exe sign /fd sha256 /a /f $env:WINDOWS_CERT_PFX /p $env:WINDOWS_CERT_PASSWORD <path-to-msi-or-exe>
-
       - name: Stage release assets (macOS/Linux)
         if: runner.os != 'Windows'
         shell: bash
@@ -197,7 +178,7 @@ jobs:
           if [[ "${RUNNER_OS}" == "macOS" ]]; then
             ARCH="${{ matrix.arch }}"
             OS_LABEL="macos"
-            
+          
             # Copy DMG files with consistent naming
             dmg_files=("$BUNDLE_DIR"/dmg/*.dmg)
             if (( ${#dmg_files[@]} )); then
@@ -207,7 +188,7 @@ jobs:
                 echo "Staged: ionicx-${OS_LABEL}-${ARCH}.dmg"
               done
             fi
-            
+          
             # Copy app.zip files
             appzip_files=("$BUNDLE_DIR"/macos/*.app.zip)
             if (( ${#appzip_files[@]} )); then
@@ -222,7 +203,7 @@ jobs:
           if [[ "${RUNNER_OS}" == "Linux" ]]; then
             ARCH="${{ matrix.arch }}"
             OS_LABEL="linux"
-            
+          
             # AppImage
             appimage_files=("$BUNDLE_DIR"/appimage/*.AppImage)
             if (( ${#appimage_files[@]} )); then
@@ -233,7 +214,7 @@ jobs:
                 echo "Staged: ionicx-${OS_LABEL}-${ARCH}.AppImage"
               done
             fi
-            
+          
             # DEB
             deb_files=("$BUNDLE_DIR"/deb/*.deb)
             if (( ${#deb_files[@]} )); then
@@ -243,7 +224,7 @@ jobs:
                 echo "Staged: ionicx-${OS_LABEL}-${ARCH}.deb"
               done
             fi
-            
+          
             # RPM
             rpm_files=("$BUNDLE_DIR"/rpm/*.rpm)
             if (( ${#rpm_files[@]} )); then
@@ -284,7 +265,7 @@ jobs:
             $destName = "ionicx-${osLabel}-${arch}.msi"
             $dest = Join-Path $outDir $destName
             Copy-Item $msi.FullName $dest -Force
-            
+          
             # Generate checksum
             $hash = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
             Set-Content -Path "${dest}.sha256" -Value "$hash  $destName"
@@ -297,7 +278,7 @@ jobs:
             $destName = "ionicx-${osLabel}-${arch}.exe"
             $dest = Join-Path $outDir $destName
             Copy-Item $exe.FullName $dest -Force
-            
+          
             # Generate checksum
             $hash = (Get-FileHash -Path $dest -Algorithm SHA256).Hash
             Set-Content -Path "${dest}.sha256" -Value "$hash  $destName"
@@ -451,4 +432,4 @@ jobs:
             sha256sum -c *.sha256
             ```
             
-            See [all checksums](https://github.com/${{ github.repository }}/releases/download/${{ env.RELEASE_TAG }}/CHECKSUMS.txt)
+            See all checksums in CHECKSUMS.txt
