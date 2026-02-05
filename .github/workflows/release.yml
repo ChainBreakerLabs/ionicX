@@ -187,6 +187,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          shopt -s nullglob
           
           OUT_DIR="release-assets"
           BUNDLE_DIR="apps/desktop/src-tauri/target/release/bundle"
@@ -198,19 +199,19 @@ jobs:
             OS_LABEL="macos"
             
             # Copy DMG files with consistent naming
-            if [[ -f "$BUNDLE_DIR"/dmg/*.dmg ]]; then
-              for f in "$BUNDLE_DIR"/dmg/*.dmg; do
-                filename=$(basename "$f")
+            dmg_files=("$BUNDLE_DIR"/dmg/*.dmg)
+            if (( ${#dmg_files[@]} )); then
+              for f in "${dmg_files[@]}"; do
                 cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.dmg"
-                # Generate checksum
                 (cd "$OUT_DIR" && shasum -a 256 "ionicx-${OS_LABEL}-${ARCH}.dmg" > "ionicx-${OS_LABEL}-${ARCH}.dmg.sha256")
                 echo "Staged: ionicx-${OS_LABEL}-${ARCH}.dmg"
               done
             fi
             
             # Copy app.zip files
-            if [[ -f "$BUNDLE_DIR"/macos/*.app.zip ]]; then
-              for f in "$BUNDLE_DIR"/macos/*.app.zip; do
+            appzip_files=("$BUNDLE_DIR"/macos/*.app.zip)
+            if (( ${#appzip_files[@]} )); then
+              for f in "${appzip_files[@]}"; do
                 cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.app.zip"
                 (cd "$OUT_DIR" && shasum -a 256 "ionicx-${OS_LABEL}-${ARCH}.app.zip" > "ionicx-${OS_LABEL}-${ARCH}.app.zip.sha256")
                 echo "Staged: ionicx-${OS_LABEL}-${ARCH}.app.zip"
@@ -223,8 +224,9 @@ jobs:
             OS_LABEL="linux"
             
             # AppImage
-            if [[ -f "$BUNDLE_DIR"/appimage/*.AppImage ]]; then
-              for f in "$BUNDLE_DIR"/appimage/*.AppImage; do
+            appimage_files=("$BUNDLE_DIR"/appimage/*.AppImage)
+            if (( ${#appimage_files[@]} )); then
+              for f in "${appimage_files[@]}"; do
                 cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.AppImage"
                 chmod +x "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.AppImage"
                 (cd "$OUT_DIR" && sha256sum "ionicx-${OS_LABEL}-${ARCH}.AppImage" > "ionicx-${OS_LABEL}-${ARCH}.AppImage.sha256")
@@ -233,8 +235,9 @@ jobs:
             fi
             
             # DEB
-            if [[ -f "$BUNDLE_DIR"/deb/*.deb ]]; then
-              for f in "$BUNDLE_DIR"/deb/*.deb; do
+            deb_files=("$BUNDLE_DIR"/deb/*.deb)
+            if (( ${#deb_files[@]} )); then
+              for f in "${deb_files[@]}"; do
                 cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.deb"
                 (cd "$OUT_DIR" && sha256sum "ionicx-${OS_LABEL}-${ARCH}.deb" > "ionicx-${OS_LABEL}-${ARCH}.deb.sha256")
                 echo "Staged: ionicx-${OS_LABEL}-${ARCH}.deb"
@@ -242,8 +245,9 @@ jobs:
             fi
             
             # RPM
-            if [[ -f "$BUNDLE_DIR"/rpm/*.rpm ]]; then
-              for f in "$BUNDLE_DIR"/rpm/*.rpm; do
+            rpm_files=("$BUNDLE_DIR"/rpm/*.rpm)
+            if (( ${#rpm_files[@]} )); then
+              for f in "${rpm_files[@]}"; do
                 cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.rpm"
                 (cd "$OUT_DIR" && sha256sum "ionicx-${OS_LABEL}-${ARCH}.rpm" > "ionicx-${OS_LABEL}-${ARCH}.rpm.sha256")
                 echo "Staged: ionicx-${OS_LABEL}-${ARCH}.rpm"
