@@ -3,7 +3,8 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 BACKEND_DIR="${ROOT_DIR}/services/api"
-OUT_DIR="${ROOT_DIR}/apps/desktop/src-tauri/bin"
+TAURI_DIR="${ROOT_DIR}/apps/desktop/src-tauri"
+OUT_DIR="${TAURI_DIR}/bin"
 
 mkdir -p "${OUT_DIR}"
 
@@ -55,9 +56,17 @@ if [[ ! -f "${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}" ]]; then
   exit 1
 fi
 
-# Copy to generic name for Tauri to find it
+# Copy to generic name for convenience and to the Tauri root for bundling
 if ! cp "${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}" "${OUT_DIR}/${OUTPUT_NAME}"; then
   echo "ERROR: Failed to copy binary to ${OUT_DIR}/${OUTPUT_NAME}"
+  exit 1
+fi
+if ! cp "${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}" "${TAURI_DIR}/${OUTPUT_NAME_WITH_TARGET}"; then
+  echo "ERROR: Failed to copy binary to ${TAURI_DIR}/${OUTPUT_NAME_WITH_TARGET}"
+  exit 1
+fi
+if ! cp "${OUT_DIR}/${OUTPUT_NAME_WITH_TARGET}" "${TAURI_DIR}/${OUTPUT_NAME}"; then
+  echo "ERROR: Failed to copy binary to ${TAURI_DIR}/${OUTPUT_NAME}"
   exit 1
 fi
 

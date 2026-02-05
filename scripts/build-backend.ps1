@@ -2,7 +2,8 @@ $ErrorActionPreference = "Stop"
 
 $rootDir = Resolve-Path (Join-Path $PSScriptRoot "..")
 $backendDir = Join-Path $rootDir "services/api"
-$outDir = Join-Path $rootDir "apps/desktop/src-tauri/bin"
+$tauriDir = Join-Path $rootDir "apps/desktop/src-tauri"
+$outDir = Join-Path $tauriDir "bin"
 
 New-Item -ItemType Directory -Force -Path $outDir | Out-Null
 
@@ -46,10 +47,22 @@ if (-not (Test-Path $binaryPath)) {
     exit 1
 }
 
-# Copy to generic name for Tauri to find it
+# Copy to generic name for convenience and to the Tauri root for bundling
 $genericPath = Join-Path $outDir $outputName
 if (-not (Copy-Item $binaryPath $genericPath -Force -PassThru)) {
     Write-Error "Failed to copy binary to $genericPath"
+    exit 1
+}
+
+$rootTargetPath = Join-Path $tauriDir $outputNameWithTarget
+if (-not (Copy-Item $binaryPath $rootTargetPath -Force -PassThru)) {
+    Write-Error "Failed to copy binary to $rootTargetPath"
+    exit 1
+}
+
+$rootGenericPath = Join-Path $tauriDir $outputName
+if (-not (Copy-Item $binaryPath $rootGenericPath -Force -PassThru)) {
+    Write-Error "Failed to copy binary to $rootGenericPath"
     exit 1
 }
 
