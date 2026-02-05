@@ -31,7 +31,7 @@ jobs:
         include:
           # macOS builds (native runners per arch)
           - { os: 'macos', runner: 'macos-14', arch: 'arm64', goos: 'darwin', goarch: 'arm64' }
-          - { os: 'macos', runner: 'macos-13', arch: 'x64', goos: 'darwin', goarch: 'amd64' }
+          - { os: 'macos', runner: 'macos-15-intel', arch: 'x64', goos: 'darwin', goarch: 'amd64' }
           # Ubuntu/Linux builds (native runners per arch)
           - { os: 'linux', runner: 'ubuntu-latest', arch: 'x86_64', goos: 'linux', goarch: 'amd64' }
           - { os: 'linux', runner: 'ubuntu-24.04-arm64', arch: 'arm64', goos: 'linux', goarch: 'arm64' }
@@ -102,11 +102,19 @@ jobs:
 
       - name: Generate backend binary checksum (mac/linux)
         if: runner.os != 'Windows'
+        shell: bash
         run: |
+          set -euo pipefail
           cd apps/desktop/src-tauri/bin
-          for f in ionicx-api*; do
-            sha256sum "$f" > "${f}.sha256"
-          done
+          if [[ "${RUNNER_OS}" == "macOS" ]]; then
+            for f in ionicx-api*; do
+              shasum -a 256 "$f" > "${f}.sha256"
+            done
+          else
+            for f in ionicx-api*; do
+              sha256sum "$f" > "${f}.sha256"
+            done
+          fi
           ls -la
 
       - name: Generate backend binary checksum (windows)
@@ -194,7 +202,7 @@ jobs:
                 filename=$(basename "$f")
                 cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.dmg"
                 # Generate checksum
-                (cd "$OUT_DIR" && sha256sum "ionicx-${OS_LABEL}-${ARCH}.dmg" > "ionicx-${OS_LABEL}-${ARCH}.dmg.sha256")
+                (cd "$OUT_DIR" && shasum -a 256 "ionicx-${OS_LABEL}-${ARCH}.dmg" > "ionicx-${OS_LABEL}-${ARCH}.dmg.sha256")
                 echo "Staged: ionicx-${OS_LABEL}-${ARCH}.dmg"
               done
             fi
@@ -203,7 +211,7 @@ jobs:
             if [[ -f "$BUNDLE_DIR"/macos/*.app.zip ]]; then
               for f in "$BUNDLE_DIR"/macos/*.app.zip; do
                 cp "$f" "$OUT_DIR/ionicx-${OS_LABEL}-${ARCH}.app.zip"
-                (cd "$OUT_DIR" && sha256sum "ionicx-${OS_LABEL}-${ARCH}.app.zip" > "ionicx-${OS_LABEL}-${ARCH}.app.zip.sha256")
+                (cd "$OUT_DIR" && shasum -a 256 "ionicx-${OS_LABEL}-${ARCH}.app.zip" > "ionicx-${OS_LABEL}-${ARCH}.app.zip.sha256")
                 echo "Staged: ionicx-${OS_LABEL}-${ARCH}.app.zip"
               done
             fi
