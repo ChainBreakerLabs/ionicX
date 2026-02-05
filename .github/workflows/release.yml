@@ -130,6 +130,7 @@ jobs:
 
       - name: Verify backend binary (mac/linux)
         if: runner.os != 'Windows'
+        shell: bash
         run: |
           BIN_DIR="apps/desktop/src-tauri/bin"
           if [[ ! -f "$BIN_DIR/ionicx-api" ]] && [[ ! -f "$BIN_DIR/ionicx-api"* ]]; then
@@ -364,6 +365,7 @@ jobs:
           merge-multiple: true
 
       - name: Organize and validate assets
+        shell: bash
         run: |
           set -euo pipefail
           echo "📦 Downloaded artifacts:"
