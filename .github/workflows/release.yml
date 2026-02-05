@@ -252,11 +252,11 @@ jobs:
           fi
           
           # Validate assets exist
-          count=$(ls -1 "$OUT_DIR"/*.{dmg,deb,rpm,AppImage,app.zip} 2>/dev/null | wc -l | tr -d ' ')
+          count=$(find "$OUT_DIR" -maxdepth 1 -type f \( -name "*.dmg" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" -o -name "*.app.zip" \) | wc -l | tr -d ' ')
           if [[ "$count" -eq 0 ]]; then
             echo "ERROR: No release assets found in $BUNDLE_DIR"
             echo "Contents of $BUNDLE_DIR:"
-            find "$BUNDLE_DIR" -type f -name "*.dmg" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" -o -name "*.app.zip" | head -20
+            find "$BUNDLE_DIR" -type f \( -name "*.dmg" -o -name "*.deb" -o -name "*.rpm" -o -name "*.AppImage" -o -name "*.app.zip" \) | head -20
             exit 1
           fi
           
