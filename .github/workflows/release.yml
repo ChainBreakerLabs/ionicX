@@ -29,12 +29,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          # macOS builds
-          - { os: 'macos', runner: 'macos-latest', arch: 'arm64', goos: 'darwin', goarch: 'arm64' }
-          - { os: 'macos', runner: 'macos-latest', arch: 'x64', goos: 'darwin', goarch: 'amd64' }
-          # Ubuntu/Linux builds
+          # macOS builds (native runners per arch)
+          - { os: 'macos', runner: 'macos-14', arch: 'arm64', goos: 'darwin', goarch: 'arm64' }
+          - { os: 'macos', runner: 'macos-13', arch: 'x64', goos: 'darwin', goarch: 'amd64' }
+          # Ubuntu/Linux builds (native runners per arch)
           - { os: 'linux', runner: 'ubuntu-latest', arch: 'x86_64', goos: 'linux', goarch: 'amd64' }
-          - { os: 'linux', runner: 'ubuntu-latest', arch: 'arm64', goos: 'linux', goarch: 'arm64' }
+          - { os: 'linux', runner: 'ubuntu-24.04-arm64', arch: 'arm64', goos: 'linux', goarch: 'arm64' }
           # Windows builds
           - { os: 'windows', runner: 'windows-latest', arch: 'x64', goos: 'windows', goarch: 'amd64' }
 
