@@ -10,9 +10,6 @@ echo "Building frontend..."
 (cd "${ROOT_DIR}/apps/web" && npm run build)
 
 echo "Building desktop bundle..."
-if ! (cd "${ROOT_DIR}/apps/desktop" && npm run tauri build); then
-  echo "Tauri build failed. Attempting DMG fallback..."
-  "${ROOT_DIR}/scripts/build-dmg-simple.sh"
-fi
+(cd "${ROOT_DIR}/apps/desktop" && npm run tauri build)
 
 echo "Desktop build complete."

@@ -159,9 +159,80 @@ jobs:
         working-directory: apps/web
         run: npm run build
 
+      - name: Validate macOS signing and notarization secrets
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          missing=0
+          for v in APPLE_CERTIFICATE APPLE_CERTIFICATE_PASSWORD APPLE_API_KEY APPLE_API_ISSUER APPLE_API_KEY_P8; do
+            if [[ -z "${!v:-}" ]]; then
+              echo "::error::Missing required secret: ${v}"
+              missing=1
+            fi
+          done
+          if [[ "$missing" -ne 0 ]]; then
+            echo "::error::macOS release artifacts must be signed and notarized."
+            exit 1
+          fi
+
+      - name: Prepare App Store Connect API key
+        if: runner.os == 'macOS'
+        shell: bash
+        env:
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_KEY_P8: ${{ secrets.APPLE_API_KEY_P8 }}
+        run: |
+          set -euo pipefail
+          KEY_FILE="${RUNNER_TEMP}/AuthKey_${APPLE_API_KEY}.p8"
+          printf '%s\n' "${APPLE_API_KEY_P8}" > "${KEY_FILE}"
+          chmod 600 "${KEY_FILE}"
+          echo "APPLE_API_KEY_PATH=${KEY_FILE}" >> "${GITHUB_ENV}"
+
       - name: Build desktop
         working-directory: apps/desktop
+        env:
+          APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
+          APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
+          APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+          APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+          APPLE_API_KEY_PATH: ${{ env.APPLE_API_KEY_PATH }}
+          TAURI_BUNDLER_DMG_IGNORE_CI: ${{ runner.os == 'macOS' && 'true' || '' }}
         run: npm run tauri build
+
+      - name: Validate macOS installers
+        if: runner.os == 'macOS'
+        shell: bash
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+
+          BUNDLE_DIR="apps/desktop/src-tauri/target/release/bundle"
+
+          simple_dmg_files=("$BUNDLE_DIR"/dmg/*_simple.dmg)
+          if (( ${#simple_dmg_files[@]} )); then
+            echo "ERROR: fallback simple DMG found. This artifact must not be published:"
+            printf '  - %s\n' "${simple_dmg_files[@]}"
+            exit 1
+          fi
+
+          dmg_files=("$BUNDLE_DIR"/dmg/*.dmg)
+          if (( ${#dmg_files[@]} == 0 )); then
+            echo "ERROR: no DMG files were produced."
+            exit 1
+          fi
+
+          for dmg in "${dmg_files[@]}"; do
+            echo "Validating ${dmg}"
+            hdiutil verify "${dmg}"
+            xcrun stapler validate "${dmg}"
+          done
 
       - name: Stage release assets (macOS/Linux)
         if: runner.os != 'Windows'

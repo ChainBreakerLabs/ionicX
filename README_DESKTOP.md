@@ -53,6 +53,18 @@ scripts/build-backend.sh
 ```bash
 scripts/build-desktop.sh
 ```
+> Este comando ahora falla si Tauri no puede generar el bundle oficial.  
+> Ya no hace fallback automático a DMG simple para evitar publicar instaladores defectuosos.
+
+**Release macOS (firmado y notarizado)**
+- Configura estos secretos en GitHub Actions:
+  - `APPLE_CERTIFICATE` (contenido base64 del certificado `.p12` Developer ID Application)
+  - `APPLE_CERTIFICATE_PASSWORD`
+  - `APPLE_API_KEY` (Key ID de App Store Connect)
+  - `APPLE_API_ISSUER` (Issuer ID de App Store Connect)
+  - `APPLE_API_KEY_P8` (contenido del archivo `AuthKey_XXXX.p8`)
+- El workflow valida que existan esos secretos, firma/notariza el build y verifica cada `.dmg` con `hdiutil verify` y `xcrun stapler validate` antes de publicarlo.
+- El workflow fuerza el layout de DMG en CI con `TAURI_BUNDLER_DMG_IGNORE_CI=true` para evitar ventanas gigantes sin posicionamiento de íconos.
 
 **Fuentes embebidas (50 familias)**
 ```bash
@@ -81,10 +93,11 @@ apps/desktop/src-tauri/target/release/bundle/
 **Falla `bundle_dmg.sh` (macOS)**
 - Asegura tener Xcode Command Line Tools (`xcode-select --install`).
 - Ejecuta el build desde una sesión con UI (no headless) y permite a la terminal controlar Finder/Automation si macOS lo solicita.
-- Fallback manual de DMG (sin AppleScript):
+- Fallback manual de DMG (sin AppleScript, solo pruebas locales):
   ```bash
-  scripts/build-dmg-simple.sh
+  ALLOW_SIMPLE_DMG_FALLBACK=1 scripts/build-dmg-simple.sh
   ```
+  No distribuir ese artefacto: no es equivalente al instalador de release.
 
 ## Notas
 - No se usa Docker.
